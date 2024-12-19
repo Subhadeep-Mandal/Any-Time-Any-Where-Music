@@ -1,0 +1,117 @@
+*{
+    margin: 0px;
+    padding: 0px; 
+}
+
+.flexbox{
+    display: flex;
+}
+
+.align{
+    align-items: center;
+}
+
+.justify{
+    justify-content: center;
+}
+
+.border{
+    border: 1px solid black;
+}
+
+.bgblack{
+    background-color: black;
+    color: white;
+}
+
+.margin{
+    margin: 3px;
+}
+
+.rounded{
+    border-radius: 5px;
+}
+
+.bgmidgrey{
+    background-color: rgb(31, 31, 31);
+}
+
+.bggrey{
+    background-color: rgb(58, 58, 58);
+}
+
+.invert{
+    filter: invert();
+}
+
+.padding{
+    padding: 10px;
+}
+
+.font{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.marginthick{
+    margin: 5px;
+    margin-bottom: 3px;
+}
+
+.right{
+    margin-left: 0px;
+    margin-top: 6px;
+}
+
+.resize{
+    object-fit: contain;
+    max-height: 200px
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #404040;
+    border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 10px;
+    border: 2px solid #2c2c2c;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #777;
+  }
+  
+  ::-webkit-scrollbar-thumb:active {
+    background: #999;
+  }
+  
+  .hidden-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .hidden-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+.btn{
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    border-radius: 15px;
+    padding-left: 5px;
+    padding-right: 5px;
+    cursor: pointer;
+    padding-bottom: 2px;
+    margin: 0 auto;
+    border:none;
+    transition: font-size 0.3s;
+    width:80px
+}
