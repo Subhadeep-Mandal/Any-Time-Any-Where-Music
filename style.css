@@ -245,8 +245,37 @@ padding-top: 2px;
 
 .playbox{
     margin: 5px 0px;
-    height: 8.6vh;
+    height: 10.5vh;
+    align-items: center;
+    justify-content: center;
+    position:relative;
+}
+
+.playelements{
     align-items: center;
     justify-content: center;
     gap: 80px;
+    padding:7px ;
+}
+
+.seekbar{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 4px;
+    background-color: #bcbcbc;
+    width: 89%;
+    position: absolute;
+    margin-left: 4.2vw;
+    border-radius: 20px;
+    bottom: 15px;
+}
+
+.circle{
+    background-color: #bcbcbc;
+    border-radius: 50%;
+    height: 12px;
+    width: 12px;
+    margin-right: 66.4vw;
+    transition-duration: 0.5s;
 }
