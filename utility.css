@@ -64,7 +64,7 @@
 
 .resize{
     object-fit: contain;
-    max-height: 200px
+    max-height: 200px;
 }
 
 ::-webkit-scrollbar {
