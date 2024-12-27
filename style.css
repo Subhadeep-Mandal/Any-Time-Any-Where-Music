@@ -400,7 +400,15 @@ padding-top: 2px;
 @media (max-width: 1450px) {
     
     .container{
-        height: 935px;
+        height: 100%;
+    }
+
+    .left{
+        height: 99.9%;
+    }
+
+    .home{
+        height: 19%;
     }
 
     .right{
@@ -583,6 +591,42 @@ padding-top: 2px;
 }
 
 @media (max-width: 450px) {
+
+    .container{
+        height: 100%;
+    }
+
+    .home{
+        height: 19%;
+    }
+
+    .home img{
+        padding-top:6px;
+    }
+
+    .library{
+        height: 78%;
+    }
+
+    .heading{
+        margin-top: 15px;
+    }
+
+    .library {
+        height: 75%
+    }
+    
+    .songslist {
+        overflow-y: auto; 
+    }
+     
+    .songslist ul {
+        margin-top: 20px;
+    }    
+
+    .footer{
+        margin-bottom: 10px;
+    }
 
     .volume{
         transition: all 0.1s ease;

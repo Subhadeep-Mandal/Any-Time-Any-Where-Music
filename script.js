@@ -1,45 +1,73 @@
-console.log("It's JavaScript");
-
 let songs = []; // Global songs array
 let currentSong = new Audio();
+let currfolder; // Global variable for current folder
 
-async function getsongs() {
+async function getsongs(folder) {
     try {
-        let response = await fetch("http://127.0.0.1:5500/SPOTIFY/Songs/");
+        currfolder = folder; // Set the current folder
+        let response = await fetch(`http://127.0.0.1:5500/SPOTIFY/${folder}/`);
         let text = await response.text();
 
-        console.log("Fetched directory:", text);
-
+        // Parse directory listing
         let div = document.createElement("div");
         div.innerHTML = text;
         let links = div.getElementsByTagName("a");
 
-        songs = []; // Reset global songs array
+        let songs = []; // Local songs array
         for (let link of links) {
             if (link.href.endsWith(".mp3")) {
-                songs.push(decodeURIComponent(link.href.split("/Songs/")[1]));
+                songs.push(decodeURIComponent(link.href.split(`/${folder}/`)[1]));
             }
         }
+
+        // Update the song list in the DOM
+        let songUl = document.querySelector(".songslist ul");
+        songUl.innerHTML=""
+        if (songUl) {
+            songUl.innerHTML = ""; // Clear any previous entries
+            for (const song of songs) {
+                let [title, artist] = song.split(" - ");
+                artist = artist?.replace(".mp3", "");
+
+                songUl.innerHTML += `
+                    <li>
+                        <img class="cd" src="JPGs/musicicon.jpg" alt=""> 
+                        <div class="infocd">
+                            <div class="info">
+                                <div> Song - ${title || "Unknown Title"}</div>
+                                <div>Ft - ${artist || "Unknown Artist"}</div>
+                            </div>
+                            <div><img class="libplay" src="SVGs/play.svg" alt="play"></div>
+                        </div>
+                    </li>`;
+            }
+
+            // Add event listeners for playing music
+            document.querySelectorAll(".songslist li").forEach((li) => {
+                li.addEventListener("click", () => {
+                    let fullTitle = li.querySelector(".info div:first-child").innerText.replace("Song - ", "").trim();
+                    let artist = li.querySelector(".info div:nth-child(2)").innerText.replace("Ft - ", "").trim();
+
+                    let track = `${fullTitle} - ${artist}.mp3`;
+                    console.log("Track selected:", track);
+
+                    playMusic(track); // Assuming playMusic is defined elsewhere
+                });
+            });
+        } else {
+            console.error("Song list element not found!");
+        }
+
         return songs;
     } catch (error) {
-        console.error("Error fetching songs:", error);
+        console.error(`Error fetching songs for folder "${currfolder}":`, error);
         return [];
     }
 }
 
-function formatTime(seconds) {
-    if (isNaN(seconds) || seconds < 0) {
-        return "00:00";
-    }
-
-    let minutes = Math.floor(seconds / 60);
-    let remainingSeconds = Math.floor(seconds % 60);
-
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-}
-
+//Taking current song
 const playMusic = async (track, pause = false) => {
-    const baseUrl = "http://127.0.0.1:5500/SPOTIFY/Songs/";
+    const baseUrl = `http://127.0.0.1:5500/SPOTIFY/${currfolder}/`;
     currentSong.src = baseUrl + encodeURIComponent(track);
 
     try {
@@ -57,49 +85,97 @@ const playMusic = async (track, pause = false) => {
 
     document.querySelector(".songname").innerHTML = `Now Playing - ` + track;
     document.querySelector(".songtime").innerHTML = `${formatTime(currentSong.currentTime)} / ${formatTime(currentSong.duration)}`;
+
 };
 
-async function main() {
-    await getsongs(); // Update the global songs array
-    console.log("Songs list:", songs);
+async function displayAlbums() {
+    try {
+        let response = await fetch(`http://127.0.0.1:5500/SPOTIFY/Songs/`);
+        let text = await response.text();
+        let cards = document.querySelector(".cards");
 
-    // Start with the first song paused
-    playMusic(songs[0], true);
+        // Parse directory listing
+        let div = document.createElement("div");
+        div.innerHTML = text;
+        let links = div.getElementsByTagName("a");
+        let albums = [];
+        let albumLinks = [];
+        let albumData = []; // Store metadata
 
-    let songUl = document.querySelector(".songslist ul");
+        // Use a document fragment for better performance
+        let fragment = document.createDocumentFragment();
 
-    if (songUl) {
-        for (const song of songs) {
-            let [title, artist] = song.split(" - ");
-            artist = artist?.replace(".mp3", "");
+        for (let link of links) {
+            if (link.href.includes("/SPOTIFY/Songs/") && !link.href.endsWith("..")) {
+                let albumName = link.href.split("/SPOTIFY/Songs/")[1].replace(/\/$/, "");
+                albums.push(decodeURIComponent(albumName));
+                albumLinks.push(link.href);
 
-            songUl.innerHTML += `
-                <li>
-                    <img class="cd" src="JPGs/musicicon.jpg" alt=""> 
-                    <div class="infocd">
-                        <div class="info">
-                            <div> Song - ${title || "Unknown Title"}</div>
-                            <div>Ft - ${artist || "Unknown Artist"}</div>
-                        </div>
-                        <div><img class="libplay" src="SVGs/play.svg" alt="play"></div>
-                    </div>
-                </li>`;
+                // Fetch metadata
+                let title = albumName; // Default to album name
+                let description = "No description available."; // Default description
+                try {
+                    let m = await fetch(`http://127.0.0.1:5500/SPOTIFY/Songs/${albumName}/info.json`);
+                    let metadata = await m.json();
+                    title = metadata.title || albumName;
+                    description = metadata.description || "No description available.";
+                    albumData.push({ albumName, title, description });
+                } catch (jsonError) {}
+
+                // Create card element
+                let card = document.createElement("div");
+                card.className = "card";
+                card.dataset.folder = albumName;
+                card.innerHTML = `
+                    <img class="play" src="SVGs/play.svg" alt="play">
+                    <img class="resize" src="/SPOTIFY/Songs/${albumName}/cover.jpg" alt="${title}">
+                    <h3>${title}</h3>
+                    <p>${description}</p>
+                `;
+                fragment.appendChild(card);
+            }
         }
 
-        document.querySelectorAll(".songslist li").forEach((li) => {
-            li.addEventListener("click", () => {
-                let fullTitle = li.querySelector(".info div:first-child").innerText.replace("Song - ", "").trim();
-                let artist = li.querySelector(".info div:nth-child(2)").innerText.replace("Ft - ", "").trim();
+        // Append all cards at once
+        cards.appendChild(fragment);
 
-                let track = `${fullTitle} - ${artist}.mp3`;
-                console.log("Track selected:", track);
-
-                playMusic(track);
+        // Attach click event listeners to cards
+        Array.from(document.getElementsByClassName("card")).forEach((card) => {
+            card.addEventListener("click", async (event) => {
+                document.querySelector(".left").style.left = "0%";
+                let folder = event.currentTarget.dataset.folder;
+                songs = await getsongs(`Songs/${folder}`);
             });
         });
-    } else {
-        console.error("Song list element not found!");
+
+        console.log("Albums with Metadata:", albumData);
+    } catch (error) {}
+}
+
+
+async function main() {
+
+    songs = await getsongs("Songs/Moody"); // Update the global songs array
+
+    // Start with the first song paused
+    if (songs.length > 0) {
+        playMusic(songs[0], true);
     }
+
+    //Display dynamic albums added in folder
+    displayAlbums()
+
+}
+
+function formatTime(seconds) {
+    if (isNaN(seconds) || seconds < 0) {
+        return "00:00";
+    }
+
+    let minutes = Math.floor(seconds / 60);
+    let remainingSeconds = Math.floor(seconds % 60);
+
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
 // Fix missing variables
@@ -115,6 +191,32 @@ play.addEventListener("click", () => {
     } else {
         currentSong.pause();
         play.src = "SVGs/play-button.svg";
+    }
+});
+
+// Automatically play the next song or loop to the first song
+currentSong.addEventListener("ended", () => {
+    let currentIndex = songs.findIndex(song => song === decodeURIComponent(currentSong.src.split("/").pop()));
+
+    if (currentIndex < songs.length - 1) {
+        // Play the next song in the list
+        playMusic(songs[currentIndex + 1]);
+    } else {
+        // Loop back to the first song
+        playMusic(songs[0]);
+    }
+});
+
+// "Next" button functionality
+next.addEventListener("click", () => {
+    let currentIndex = songs.findIndex(song => song === decodeURIComponent(currentSong.src.split("/").pop()));
+
+    if (currentIndex < songs.length - 1) {
+        // Play the next song
+        playMusic(songs[currentIndex + 1]);
+    } else {
+        // Loop to the first song
+        playMusic(songs[0]);
     }
 });
 
@@ -206,6 +308,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-
 // Call the main function
-main();
+main("Songs");
