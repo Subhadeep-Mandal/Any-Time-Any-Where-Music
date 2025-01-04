@@ -22,7 +22,6 @@ async function getsongs(folder) {
 
         // Update the song list in the DOM
         let songUl = document.querySelector(".songslist ul");
-        songUl.innerHTML=""
         if (songUl) {
             songUl.innerHTML = ""; // Clear any previous entries
             for (const song of songs) {
@@ -60,12 +59,12 @@ async function getsongs(folder) {
 
         return songs;
     } catch (error) {
-        console.error(`Error fetching songs for folder "${currfolder}":`, error);
+        console.error("Error fetching songs:", error);
         return [];
     }
 }
 
-//Taking current song
+// Taking current song
 const playMusic = async (track, pause = false) => {
     const baseUrl = `http://127.0.0.1:5500/SPOTIFY/${currfolder}/`;
     currentSong.src = baseUrl + encodeURIComponent(track);
@@ -80,7 +79,7 @@ const playMusic = async (track, pause = false) => {
             play.src = "SVGs/play-button.svg";
         }
     } catch (error) {
-        console.error("Error playing track:", error);
+        console.error("Error playing music:", error);
     }
 
     document.querySelector(".songname").innerHTML = `Now Playing - ` + track;
@@ -147,14 +146,12 @@ async function displayAlbums() {
                 songs = await getsongs(`Songs/${folder}`);
             });
         });
-
-        console.log("Albums with Metadata:", albumData);
-    } catch (error) {}
+    } catch (error) {
+        console.error("Error displaying albums:", error);
+    }
 }
 
-
 async function main() {
-
     songs = await getsongs("Songs/Moody"); // Update the global songs array
 
     // Start with the first song paused
@@ -162,9 +159,8 @@ async function main() {
         playMusic(songs[0], true);
     }
 
-    //Display dynamic albums added in folder
-    displayAlbums()
-
+    // Display dynamic albums added in folder
+    displayAlbums();
 }
 
 function formatTime(seconds) {
@@ -309,4 +305,4 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Call the main function
-main("Songs");
+main("Songs"); 
